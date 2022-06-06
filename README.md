@@ -11,6 +11,7 @@
 
 ## Running the Project
 
+### Manual Setup
 1. Environmental variables to set:
 	- SECRET_KEY a secure string used to encode JWTs. Defaults to: flytospace **IF YOU DON'T CHANGE THIS IN PRODUCTION YOU ARE EXPOSING YOUR APPLICATION TO ATTACKS**
 	- DB_URL the database url used for creation the [SQLAlchemy async session](https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html). The project was created with support for [SQLite](https://www.sqlite.org/index.html) and [PostgreSQL](https://www.postgresql.org/) in mind, but others may work as well. Check the SQLAlchemy docs and verify that all models (database/models/models.py) will work with your preferred database technology: Defaults to: sqlite+aiosqlite:///test.db
@@ -18,6 +19,18 @@
 
 2. Now that you've set these variables, apply the [Alembic](https://alembic.sqlalchemy.org/en/latest/tutorial.html) database migration by running the following command at the project root: alembic upgrade head
 3. With the database tables created from the previous step, you're now ready to run FlyAPI. Ensure that your virtual environment has been activated and run the following command at the project root: python -m uvicorn main:app --reload (or without --reload if in a production environment)
+
+### Docker Setup
+
+1. If you just want to run the project in debug mode, decide which database you intend to use (example are provided for sqlite and postgres) then run this command from the project root:
+
+    docker compose -f docker-compose-sqlite-test.yml up -d
+
+
+#### Additional Docker Information
+- If you want to run this project in a production environment (unstable and not currently recommended), copy the contents of either docker-compose-{database}-test.yml file and edit to use your preferred database, connection string, and set DEV_MODE=False
+- If you use a database other than Postgres or SQLite, you may need to install the relevant asynchronous python driver (by adding this dependency in requirements.txt) in order for SQLAlchemy's engine to be able to interact with your database system. Most relational databases supported by SQLAlchemy should work, but you may run into issues depending on what level of support the database has for ENUM types (check out the data/models/models.py for more information).
+
 
 ## Running the Tests
 1. Activate the virtual environment you've made for this project

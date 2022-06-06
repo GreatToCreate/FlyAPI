@@ -1,8 +1,8 @@
 """Initial commit
 
-Revision ID: 64747ca2265b
+Revision ID: c1b8014d0f0a
 Revises: 
-Create Date: 2022-06-05 23:00:14.982644
+Create Date: 2022-06-06 13:46:29.634172
 
 """
 import fastapi_users_db_sqlalchemy
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '64747ca2265b'
+revision = 'c1b8014d0f0a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,9 +46,9 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=20), nullable=False),
     sa.Column('author_id', fastapi_users_db_sqlalchemy.generics.GUID(), nullable=True),
-    sa.Column('game_type', sa.Enum('Free Roam', 'Time Trial', 'Sprint', 'Laps', 'Hoon Attack', 'Training'), nullable=False),
-    sa.Column('difficulty', sa.Enum('Easy', 'Medium', 'Hard', 'Dangerous'), nullable=False),
-    sa.Column('length', sa.Enum('Short', 'Medium', 'Long', 'Endurance'), nullable=False),
+    sa.Column('game_type', sa.Enum('Free Roam', 'Time Trial', 'Sprint', 'Laps', 'Hoon Attack', 'Training', name='game_types'), nullable=False),
+    sa.Column('difficulty', sa.Enum('Easy', 'Medium', 'Hard', 'Dangerous', name='difficulty_types'), nullable=False),
+    sa.Column('length', sa.Enum('Short', 'Medium', 'Long', 'Endurance', name='length_types'), nullable=False),
     sa.Column('description', sa.String(), nullable=False),
     sa.Column('link', sa.String(), nullable=True),
     sa.Column('course_json', sa.JSON(), nullable=False),

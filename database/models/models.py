@@ -59,9 +59,9 @@ class Course(Base):
     author_id = Column(ForeignKey("user.id"), nullable=True)
     author = relationship("User", back_populates="courses", lazy="select")
     collections = relationship("Collection", secondary=collection_has_course, back_populates="courses")
-    game_type = Column(Enum("Free Roam", "Time Trial", "Sprint", "Laps", "Hoon Attack", "Training"), nullable=False)
-    difficulty = Column(Enum("Easy", "Medium", "Hard", "Dangerous"), nullable=False)
-    length = Column(Enum("Short", "Medium", "Long", "Endurance"), nullable=False)
+    game_type = Column(Enum("Free Roam", "Time Trial", "Sprint", "Laps", "Hoon Attack", "Training", name="game_types"), nullable=False)
+    difficulty = Column(Enum("Easy", "Medium", "Hard", "Dangerous", name="difficulty_types"), nullable=False)
+    length = Column(Enum("Short", "Medium", "Long", "Endurance", name="length_types"), nullable=False)
     description = Column(String, nullable=False)
     link = Column(String, nullable=True)
     # The actual JSON that is serialized into a track by Fly Dangerous

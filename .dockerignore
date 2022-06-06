@@ -1,0 +1,7 @@
+/test.db
+/test/api/test.db
+/venv/
+/.pytest_cache/
+/test/api/.pytest_cache/
+/.idea//ARCHITECTURE.md
+/.gitignore
