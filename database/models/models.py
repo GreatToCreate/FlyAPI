@@ -3,6 +3,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Enum, JSON, Table
 from sqlalchemy.orm import relationship
 from database.database import Base
 
+
 # ToDo consider breaking these out into their own files
 # Argument for: readability of the codebase
 
@@ -59,7 +60,8 @@ class Course(Base):
     author_id = Column(ForeignKey("user.id"), nullable=True)
     author = relationship("User", back_populates="courses", lazy="select")
     collections = relationship("Collection", secondary=collection_has_course, back_populates="courses")
-    game_type = Column(Enum("Free Roam", "Time Trial", "Sprint", "Laps", "Hoon Attack", "Training", name="game_types"), nullable=False)
+    game_type = Column(Enum("Free Roam", "Time Trial", "Sprint", "Laps", "Hoon Attack", "Training", name="game_types"),
+                       nullable=False)
     difficulty = Column(Enum("Easy", "Medium", "Hard", "Dangerous", name="difficulty_types"), nullable=False)
     length = Column(Enum("Short", "Medium", "Long", "Endurance", name="length_types"), nullable=False)
     description = Column(String, nullable=False)

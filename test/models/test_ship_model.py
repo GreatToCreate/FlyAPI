@@ -141,7 +141,6 @@ async def test_ship_create_model_with_attached_user_then_delete_user(session: As
     assert ship.ship_json == ship_data
 
 
-
 @pytest.mark.asyncio
 async def test_fail_ship_create_model_on_duplicate_name(session: AsyncSession) -> None:
     with pytest.raises(IntegrityError):

@@ -61,10 +61,3 @@ async def test_fail_user_create_model_on_duplicate_username(session: AsyncSessio
 
         session.add(user1)
         await session.commit()
-
-
-
-
-
-
-

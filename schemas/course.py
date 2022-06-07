@@ -184,6 +184,7 @@ class Course(BaseModel):
     difficulty: DifficultyEnum
     length: LengthEnum
     course_json: CourseJSON
+
     # Potential model change required to support this. Do people care about location filtering?
     # location: str
 

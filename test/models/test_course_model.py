@@ -54,7 +54,8 @@ async def test_course_create_model_with_attached_user(session: AsyncSession) -> 
         ]
     }
 
-    course = Course(name="Test Course", author_id=user.id, description="Test description", game_type="Free Roam", difficulty="Easy", length="Short", course_json=course_data)
+    course = Course(name="Test Course", author_id=user.id, description="Test description", game_type="Free Roam",
+                    difficulty="Easy", length="Short", course_json=course_data)
 
     session.add(course)
     await session.commit()
@@ -113,7 +114,8 @@ async def test_course_create_model_without_user(session: AsyncSession) -> None:
         ]
     }
 
-    course = Course(name="Test Course", description="Test description", game_type="Free Roam", difficulty="Easy", length="Short", course_json=course_data)
+    course = Course(name="Test Course", description="Test description", game_type="Free Roam", difficulty="Easy",
+                    length="Short", course_json=course_data)
 
     session.add(course)
     await session.commit()
@@ -199,7 +201,6 @@ async def test_course_create_model_with_attached_user_then_delete_user(session: 
     assert course.course_json == course_data
 
 
-
 @pytest.mark.asyncio
 async def test_fail_course_create_model_on_duplicate_name(session: AsyncSession) -> None:
     with pytest.raises(IntegrityError):
@@ -250,14 +251,15 @@ async def test_fail_course_create_model_on_duplicate_name(session: AsyncSession)
             ]
         }
 
-        course = Course(name="Test Course", author_id=user.id, description="Test description", game_type="Free Roam", difficulty="Easy", length="Short", course_json=course_data)
+        course = Course(name="Test Course", author_id=user.id, description="Test description", game_type="Free Roam",
+                        difficulty="Easy", length="Short", course_json=course_data)
 
         session.add(course)
         await session.commit()
         await session.refresh(course)
 
         course1 = Course(name="Test Course", author_id=user.id, description="Test description", game_type="Free Roam",
-                        difficulty="Easy", length="Short", course_json=course_data)
+                         difficulty="Easy", length="Short", course_json=course_data)
 
         session.add(course1)
         await session.commit()

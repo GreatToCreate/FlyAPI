@@ -117,7 +117,6 @@ async def get_collections(username: str | None = None,
                           offset: int = 0,
                           limit: int = Query(default=20, lte=30),
                           session: AsyncSession = Depends(get_async_session)):
-
     if username is None:
         stmt = select(Collection).offset(offset).limit(limit)
     elif username is not None:

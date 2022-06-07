@@ -19,7 +19,6 @@ Base: DeclarativeMeta = declarative_base()
 # future parameter indicates that querying will use SQLAlchemy 2.0 style
 engine = create_async_engine(database_url, future=True, echo=config.DEV_MODE)
 
-
 async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
