@@ -20,16 +20,17 @@
 2. Now that you've set these variables, apply the [Alembic](https://alembic.sqlalchemy.org/en/latest/tutorial.html) database migration by running the following command at the project root: alembic upgrade head
 3. With the database tables created from the previous step, you're now ready to run FlyAPI. Ensure that your virtual environment has been activated and run the following command at the project root: python -m uvicorn main:app --reload (or without --reload if in a production environment)
 
-### Docker Setup
-
-1. If you just want to run the project in debug mode, decide which database you intend to use (example are provided for sqlite and postgres) then run this command from the project root:
+## Docker Setup and Run [Recommended]
+If you just want to run the project in debug mode, decide which database you intend to use (examples are provided for sqlite and postgres) then run this command from the project root:
 
     docker compose -f docker-compose-sqlite-test.yml up -d
+
+**INFO** Note that this assumes you're running the latest version of docker which has changed the docker-compose to docker compose. User the correct command per your version of Docker.
 
 
 #### Additional Docker Information
 - If you want to run this project in a production environment (unstable and not currently recommended), copy the contents of either docker-compose-{database}-test.yml file and edit to use your preferred database, connection string, and set DEV_MODE=False
-- If you use a database other than Postgres or SQLite, you may need to install the relevant asynchronous python driver (by adding this dependency in requirements.txt) in order for SQLAlchemy's engine to be able to interact with your database system. Most relational databases supported by SQLAlchemy should work, but you may run into issues depending on what level of support the database has for ENUM types (check out the data/models/models.py for more information).
+- If you use a database other than Postgres or SQLite, you may need to install the relevant asynchronous python driver (by adding this dependency in requirements.txt) in order for SQLAlchemy's engine to be able to interact with your database system. Most relational databases supported by SQLAlchemy should work, but you may run into issues depending on what level of support the database has for ENUM types (check out the database/models/models.py for more information).
 
 
 ## Running the Tests
