@@ -205,9 +205,6 @@ class CourseIn(Course):
     link: Optional[str]
 
 
-# ToDo define collection in Pydantic schema so that I can have it optionally sitting on the CourseRead schema
-#  def Debating whether I want this functionality available now. It's cool to see how many collections a course is
-#  in, but is it really useful?
 class CourseRead(Course):
     id: int
     name: str

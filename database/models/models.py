@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from database.database import Base
 
 
-# ToDo consider breaking these out into their own files
+# Consider breaking these out into their own files
 # Argument for: readability of the codebase
 
 # Argument against: seemingly unnecessary as this file is easily searchable and won't ever contain many more models

@@ -6,7 +6,18 @@ from schemas.user import UserCreate, UserRead, UserUpdate
 from utilities.fastapi_users.users import auth_backend, fastapi_users
 from routers.ships import ship_router
 
-app = FastAPI()
+from config import config
+
+
+app = FastAPI(
+    title=config.TITLE,
+    description=config.DESCRIPTION,
+    version="0.1.0",
+    license_info={
+        "name": "AGPLv3",
+        "url": "https://www.gnu.org/licenses/agpl-3.0.en.html"
+    }
+)
 
 # Adding the various Fastapi-User routes
 app.include_router(

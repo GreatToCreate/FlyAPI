@@ -14,9 +14,25 @@ def parse_dev_mode() -> bool:
 
 class Config:
     def __init__(self):
-        self.SECRET_KEY = os.getenv("SECRET_KEY", "flytospace")
-        self.DB_URL = os.getenv("DB_URL", "sqlite+aiosqlite:///test.db")
-        self.DEV_MODE = parse_dev_mode()
+        self.SECRET_KEY: str = os.getenv("SECRET_KEY", "flytospace")
+        self.DB_URL: str = os.getenv("DB_URL", "sqlite+aiosqlite:///test.db")
+        self.DEV_MODE: bool = parse_dev_mode()
+        self.TITLE: str = "FlyAPI"
+        self.DESCRIPTION: str = """
+        FlyAPI is a REST-style service created to faciliate the sharing of custom content for Fly Dangerous
+        
+        ## Ships
+        
+        You can define custom Ships in JSON, upload them, and search for them
+        
+        ## Courses
+        
+        You can define custom courses in JSON and add metadata about length and difficulty
+        
+        ## Collections
+        
+        You can define custom collections and add courses by any user (even deleted ones!) to a collection
+        """
 
 
 config = Config()

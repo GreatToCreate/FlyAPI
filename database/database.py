@@ -7,15 +7,11 @@ from sqlalchemy.orm import sessionmaker, declarative_base, DeclarativeMeta
 
 from config import config
 
-# ToDo Need a better way to deal with environmental variables here- they're all over the place
-# Database url either defined as an environment variable or using a local sqlite instance
-
 database_url: str = config.DB_URL
 
 # Metadata object that is used to define certain sqlalchemy tables as well as used for Alembic migrations
 Base: DeclarativeMeta = declarative_base()
 
-# ToDo this is an area where the environmental variable problem is also present
 # future parameter indicates that querying will use SQLAlchemy 2.0 style
 engine = create_async_engine(database_url, future=True, echo=config.DEV_MODE)
 
