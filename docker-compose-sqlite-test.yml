@@ -7,6 +7,4 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DB_URL=sqlite+aiosqlite:///test.db
-      - SECRET_KEY=flytospace
       - DEV_MODE=True
