@@ -1,4 +1,5 @@
 from fastapi import Depends, HTTPException, APIRouter, Query
+from starlette.requests import Request
 from starlette.responses import Response
 from starlette.status import HTTP_204_NO_CONTENT
 
@@ -7,12 +8,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from fastapi_cache.decorator import cache
+
 from database.database import User, get_async_session
 from database.models.models import Ship
 from schemas.ship import ShipIn as SchemaShipIn, ShipRead as SchemaShipRead, ShipUpdate as SchemaShipUpdate
 from utilities.fastapi_users.users import current_active_user
-
-from uuid import UUID
 
 ship_router = APIRouter()
 
@@ -25,18 +26,18 @@ async def create_ship(ship: SchemaShipIn,
                       session: AsyncSession = Depends(get_async_session),
                       user: User = Depends(current_active_user)):
     try:
-        ship = Ship(name=ship.name,
-                    author_id=user.id,
-                    description=ship.description,
-                    ship_json=ship.ship_json.dict())
+        db_ship = Ship(name=ship.name,
+                       author_id=user.id,
+                       description=ship.description,
+                       ship_json=ship.ship_json.dict())
 
-        session.add(ship)
+        session.add(db_ship)
         await session.commit()
-        await session.refresh(ship)
+        await session.refresh(db_ship)
     except IntegrityError as _:
         raise HTTPException(status_code=409, detail=f"Ship name: {ship.name} already taken")
 
-    return ship.__dict__
+    return db_ship.__dict__
 
 
 @ship_router.patch("/ships/id/{ship_id}", status_code=204, tags=["ships"])
@@ -92,7 +93,10 @@ async def update_ship_by_name(ship_name: str,
 
 
 @ship_router.get("/ships/", response_model=list[SchemaShipRead], status_code=200, tags=["ships"])
-async def get_ships(username: str | None = None,
+@cache(expire=30)
+async def get_ships(request: Request,
+                    response: Response,
+                    username: str | None = None,
                     offset: int = 0,
                     limit: int = Query(default=30, lte=50),
                     session: AsyncSession = Depends(get_async_session)):
@@ -109,29 +113,38 @@ async def get_ships(username: str | None = None,
         stmt = select(Ship).where(Ship.author_id == user.id).offset(offset).limit(limit)
 
     result = await session.execute(stmt)
-    ships = result.scalars().all()
+    ships_db = result.scalars().all()
 
-    return [ship.__dict__ for ship in ships]
+    return [SchemaShipRead.from_orm(ship).dict() for ship in ships_db]
 
 
 @ship_router.get("/ships/name/{ship_name}", response_model=SchemaShipRead, status_code=200, tags=["ships"])
-async def get_ship_by_name(ship_name: str, session: AsyncSession = Depends(get_async_session)):
+@cache(expire=30)
+async def get_ship_by_name(ship_name: str,
+                           request: Request,
+                           response: Response,
+                           session: AsyncSession = Depends(get_async_session)):
     result = await session.execute(select(Ship).where(Ship.name == ship_name))
-    ship = result.scalars().first()
+    db_ship = result.scalars().first()
 
-    if ship is None:
+    if db_ship is None:
         raise HTTPException(status_code=404, detail=f"Ship: {ship_name} not found")
-    return ship.__dict__
+    return SchemaShipRead.from_orm(db_ship).dict()
 
 
 @ship_router.get("/ships/id/{ship_id}", response_model=SchemaShipRead, status_code=200, tags=["ships"])
-async def get_ship_by_id(ship_id: int, session: AsyncSession = Depends(get_async_session)):
+@cache(expire=30)
+async def get_ship_by_id(ship_id: int,
+                         request: Request,
+                         response: Response,
+                         session: AsyncSession = Depends(get_async_session)):
     result = await session.execute(select(Ship).where(Ship.id == ship_id))
-    ship = result.scalars().first()
+    db_ship = result.scalars().first()
 
-    if ship is None:
+    if db_ship is None:
         raise HTTPException(status_code=404, detail=f"Ship id: {ship_id} not found")
-    return ship.__dict__
+
+    return SchemaShipRead.from_orm(db_ship).dict()
 
 
 @ship_router.delete("/ships/id/{ship_id}", status_code=204, tags=["ships"])
@@ -139,15 +152,15 @@ async def delete_ship_by_id(ship_id: int,
                             session: AsyncSession = Depends(get_async_session),
                             user: User = Depends(current_active_user)):
     result = await session.execute(select(Ship).where(Ship.id == ship_id))
-    ship = result.scalars().first()
+    db_ship = result.scalars().first()
 
-    if ship is None:
+    if db_ship is None:
         raise HTTPException(status_code=404, detail=f"Ship id: {ship_id} not found")
 
-    if ship.author_id != user.id:
+    if db_ship.author_id != user.id:
         raise HTTPException(status_code=403,
-                            detail=f"You: {User.username} are not the creator of ship: {ship.name}")
-    await session.delete(ship)
+                            detail=f"You: {User.username} are not the creator of ship: {db_ship.name}")
+    await session.delete(db_ship)
     await session.commit()
 
     return Response(status_code=HTTP_204_NO_CONTENT)

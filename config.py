@@ -16,6 +16,7 @@ class Config:
     def __init__(self):
         self.SECRET_KEY: str = os.getenv("SECRET_KEY", "flytospace")
         self.DB_URL: str = os.getenv("DB_URL", "sqlite+aiosqlite:///test.db")
+        self.REDIS_URL: str = os.getenv("REDIS_URL", None)
         self.DEV_MODE: bool = parse_dev_mode()
         self.TITLE: str = "FlyAPI"
         self.DESCRIPTION: str = """

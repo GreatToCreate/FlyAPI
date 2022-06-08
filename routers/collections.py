@@ -3,8 +3,11 @@ from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.requests import Request
 from starlette.responses import Response
 from starlette.status import HTTP_204_NO_CONTENT
+
+from fastapi_cache.decorator import cache
 
 from database.database import User, get_async_session
 from database.models.models import Course, Collection
@@ -23,16 +26,16 @@ async def create_collection(collection: SchemaCollectionIn,
                             session: AsyncSession = Depends(get_async_session),
                             user: User = Depends(current_active_user)):
     try:
-        collection = Collection(name=collection.name,
+        db_collection = Collection(name=collection.name,
                                 description=collection.description,
                                 author_id=user.id)
 
-        session.add(collection)
+        session.add(db_collection)
         await session.commit()
-        await session.refresh(collection)
+        await session.refresh(db_collection)
     except IntegrityError as _:
         raise HTTPException(status_code=409, detail=f"Collection name already taken")
-    return collection.__dict__
+    return db_collection.__dict__
 
 
 @collection_router.patch("/collections/id/{collection_id}", status_code=204, tags=["collections"])
@@ -113,7 +116,10 @@ async def update_collection_by_id(collection_id: int,
 
 @collection_router.get("/collections/", response_model=list[SchemaCollectionRead], status_code=200,
                        tags=["collections"])
-async def get_collections(username: str | None = None,
+@cache(expire=30)
+async def get_collections(request: Request,
+                          response: Response,
+                          username: str | None = None,
                           offset: int = 0,
                           limit: int = Query(default=20, lte=30),
                           session: AsyncSession = Depends(get_async_session)):
@@ -130,33 +136,41 @@ async def get_collections(username: str | None = None,
         stmt = select(Collection).where(Collection.author_id == user.id).offset(offset).limit(limit)
 
     result = await session.execute(stmt)
-    collections = result.scalars().unique()
+    db_collections = result.scalars().unique()
 
-    return [collection.__dict__ for collection in collections]
+    return [SchemaCollectionRead.from_orm(collection).dict() for collection in db_collections]
 
 
 @collection_router.get("/collections/name/{collection_name}", response_model=SchemaCollectionRead, status_code=200,
                        tags=["collections"])
-async def get_collection_by_name(collection_name: str, session: AsyncSession = Depends(get_async_session)):
+@cache(expire=30)
+async def get_collection_by_name(request: Request,
+                                 response: Response,
+                                 collection_name: str,
+                                 session: AsyncSession = Depends(get_async_session)):
     result = await session.execute(select(Collection).where(Collection.name == collection_name))
     collection = result.scalars().first()
 
     if collection is None:
         raise HTTPException(status_code=404, detail=f"Course: {collection_name} not found")
 
-    return collection.__dict__
+    return SchemaCollectionRead.from_orm(collection).dict()
 
 
 @collection_router.get("/collections/id/{collection_id}", response_model=SchemaCollectionRead, status_code=200,
                        tags=["collections"])
-async def get_collection_by_id(collection_id: int, session: AsyncSession = Depends(get_async_session)):
+@cache(expire=30)
+async def get_collection_by_id(request: Request,
+                               response: Response,
+                               collection_id: int,
+                               session: AsyncSession = Depends(get_async_session)):
     result = await session.execute(select(Collection).where(Collection.id == collection_id))
     collection = result.scalars().first()
 
     if collection is None:
         raise HTTPException(status_code=404, detail=f"Course id: {collection_id} not found")
 
-    return collection.__dict__
+    return SchemaCollectionRead.from_orm(collection).dict()
 
 
 @collection_router.patch("/collections/id/{collection_id}/id/{course_id}", response_model=SchemaCollectionRead,

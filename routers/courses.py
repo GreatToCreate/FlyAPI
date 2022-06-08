@@ -1,17 +1,18 @@
-from typing import Optional
-
 from fastapi import Depends, HTTPException, APIRouter, Query
 from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.requests import Request
 from starlette.responses import Response
 from starlette.status import HTTP_204_NO_CONTENT
+
+from fastapi_cache.decorator import cache
 
 from database.database import User, get_async_session
 from database.models.models import Course
 from schemas.course import CourseIn as SchemaCourseIn, CourseRead as SchemaCourseRead, \
-    CourseUpdate as SchemaCourseUpdate
+    CourseUpdate as SchemaCourseUpdate, CourseReadSimple as SchemaCourseReadSimple
 from utilities.fastapi_users.users import current_active_user
 
 course_router = APIRouter()
@@ -25,21 +26,21 @@ async def create_course(course: SchemaCourseIn,
                         session: AsyncSession = Depends(get_async_session),
                         user: User = Depends(current_active_user)):
     try:
-        course = Course(name=course.name,
-                        author_id=user.id,
-                        game_type=course.game_type,
-                        difficulty=course.difficulty,
-                        length=course.length,
-                        description=course.description,
-                        link=course.link,
-                        course_json=course.course_json.dict())
+        db_course = Course(name=course.name,
+                           author_id=user.id,
+                           game_type=course.game_type,
+                           difficulty=course.difficulty,
+                           length=course.length,
+                           description=course.description,
+                           link=course.link,
+                           course_json=course.course_json.dict())
 
-        session.add(course)
+        session.add(db_course)
         await session.commit()
-        await session.refresh(course)
+        await session.refresh(db_course)
     except IntegrityError as _:
         raise HTTPException(status_code=409, detail=f"Course name already taken")
-    return course.__dict__
+    return db_course.__dict__
 
 
 @course_router.patch("/courses/id/{course_id}", status_code=204, tags=["courses"])
@@ -94,8 +95,11 @@ async def update_course_by_name(course_name: str,
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
-@course_router.get("/courses/", response_model=list[SchemaCourseRead], status_code=200, tags=["courses"])
-async def get_courses(username: str | None = None,
+@course_router.get("/courses/", response_model=list[SchemaCourseReadSimple], status_code=200, tags=["courses"])
+@cache(expire=30)
+async def get_courses(request: Request,
+                      response: Response,
+                      username: str | None = None,
                       offset: int = 0,
                       limit: int = Query(default=20, lte=50),
                       session: AsyncSession = Depends(get_async_session)):
@@ -114,10 +118,11 @@ async def get_courses(username: str | None = None,
     result = await session.execute(stmt)
     courses = result.scalars().all()
 
-    return [course.__dict__ for course in courses]
+    return [SchemaCourseReadSimple.from_orm(course).dict() for course in courses]
 
 
 @course_router.get("/courses/name/{course_name}", response_model=SchemaCourseRead, status_code=200, tags=["courses"])
+@cache(expire=30)
 async def get_course_by_name(course_name: str, session: AsyncSession = Depends(get_async_session)):
     result = await session.execute(select(Course).where(Course.name == course_name))
     course = result.scalars().first()
@@ -125,10 +130,11 @@ async def get_course_by_name(course_name: str, session: AsyncSession = Depends(g
     if course is None:
         raise HTTPException(status_code=404, detail=f"Course: {course_name} not found")
 
-    return course.__dict__
+    return SchemaCourseRead.from_orm(course).dict()
 
 
 @course_router.get("/courses/id/{course_id}", response_model=SchemaCourseRead, status_code=200, tags=["courses"])
+@cache(expire=30)
 async def get_course_by_id(course_id: int, session: AsyncSession = Depends(get_async_session)):
     result = await session.execute(select(Course).where(Course.id == course_id))
     course = result.scalars().first()
@@ -136,7 +142,7 @@ async def get_course_by_id(course_id: int, session: AsyncSession = Depends(get_a
     if course is None:
         raise HTTPException(status_code=404, detail=f"Course id: {course_id} not found")
 
-    return course.__dict__
+    return SchemaCourseRead.from_orm(course).dict()
 
 
 @course_router.delete("/courses/id/{course_id}", status_code=204, tags=["courses"])

@@ -65,3 +65,6 @@ class ShipRead(Ship):
     id: int
     name: str
     author_id: uuid.UUID
+
+    class Config:
+        orm_mode = True

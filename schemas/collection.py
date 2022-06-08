@@ -39,6 +39,9 @@ class CollectionRead(Collection):
     def set_courses(cls, v):
         return [CourseRead(**course.__dict__) for course in v] or []
 
+    class Config:
+        orm_mode = True
+
 
 class CollectionAddCourse(BaseModel):
     """

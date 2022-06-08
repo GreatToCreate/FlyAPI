@@ -6,7 +6,16 @@ from schemas.user import UserCreate, UserRead, UserUpdate
 from utilities.fastapi_users.users import auth_backend, fastapi_users
 from routers.ships import ship_router
 
+import aioredis
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+
+import sys
+
 from config import config
+
+# # This allows us to do further json serialization when traversing down our course_json schema. Default is 1000
+# sys.setrecursionlimit(10000)
 
 
 app = FastAPI(
@@ -58,3 +67,9 @@ app.include_router(
 app.include_router(
     collection_router
 )
+
+
+@app.on_event("startup")
+async def startup():
+    redis = aioredis.from_url(config.REDIS_URL, encoding="utf8", decode_responses=True)
+    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")

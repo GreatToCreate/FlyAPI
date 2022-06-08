@@ -183,7 +183,6 @@ class Course(BaseModel):
     game_type: GameTypeEnum
     difficulty: DifficultyEnum
     length: LengthEnum
-    course_json: CourseJSON
 
     # Potential model change required to support this. Do people care about location filtering?
     # location: str
@@ -194,6 +193,7 @@ class Course(BaseModel):
 
 class CourseUpdate(Course):
     link: Optional[str]
+    course_json: Optional[CourseJSON]
 
 
 class CourseIn(Course):
@@ -202,10 +202,24 @@ class CourseIn(Course):
     as a course database entry
     """
     name: str
+    course_json: CourseJSON
     link: Optional[str]
+
+
+class CourseReadSimple(Course):
+    id: int
+    name: str
+    author_id: UUID
+
+    class Config:
+        orm_mode = True
 
 
 class CourseRead(Course):
     id: int
     name: str
     author_id: UUID
+    course_json: CourseJSON
+
+    class Config:
+        orm_mode = True
