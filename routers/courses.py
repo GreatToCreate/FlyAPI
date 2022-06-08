@@ -123,7 +123,8 @@ async def get_courses(request: Request,
 
 @course_router.get("/courses/name/{course_name}", response_model=SchemaCourseRead, status_code=200, tags=["courses"])
 @cache(expire=30)
-async def get_course_by_name(course_name: str, session: AsyncSession = Depends(get_async_session)):
+async def get_course_by_name(course_name: str,
+                             session: AsyncSession = Depends(get_async_session)):
     result = await session.execute(select(Course).where(Course.name == course_name))
     course = result.scalars().first()
 
@@ -135,7 +136,8 @@ async def get_course_by_name(course_name: str, session: AsyncSession = Depends(g
 
 @course_router.get("/courses/id/{course_id}", response_model=SchemaCourseRead, status_code=200, tags=["courses"])
 @cache(expire=30)
-async def get_course_by_id(course_id: int, session: AsyncSession = Depends(get_async_session)):
+async def get_course_by_id(course_id: int,
+                           session: AsyncSession = Depends(get_async_session)):
     result = await session.execute(select(Course).where(Course.id == course_id))
     course = result.scalars().first()
 
