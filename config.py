@@ -1,12 +1,12 @@
 import os
 
 
-def parse_dev_mode() -> bool:
-    dev_mode_str: str = os.getenv("DEV_MODE")
+def parse_bool(env_variable: str) -> bool:
+    env_str: str = os.getenv(env_variable)
 
-    if dev_mode_str == "True":
+    if env_str == "True":
         return True
-    elif dev_mode_str == "False":
+    elif env_str == "False":
         return False
     else:
         return True
@@ -17,7 +17,9 @@ class Config:
         self.SECRET_KEY: str = os.getenv("SECRET_KEY", "flytospace")
         self.DB_URL: str = os.getenv("DB_URL", "sqlite+aiosqlite:///test.db")
         self.REDIS_URL: str = os.getenv("REDIS_URL", None)
-        self.DEV_MODE: bool = parse_dev_mode()
+        self.DEV_MODE: bool = parse_bool("DEV_MODE")
+        self.LIMITER_ENABLED: bool = parse_bool("LIMITER_ENABLED")
+        self.DEFAULT_LIMIT: str = os.getenv("DEFAULT_LIMIT", "10/minute")
         self.TITLE: str = "FlyAPI"
         self.DESCRIPTION: str = """
         FlyAPI is a REST-style service created to faciliate the sharing of custom content for Fly Dangerous

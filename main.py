@@ -12,8 +12,19 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from utilities.fastapi_cache.custom_builder import custom_key_builder
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.errors import RateLimitExceeded
+
 from config import config
 
+limiter = Limiter(
+    storage_uri=config.REDIS_URL,
+    key_func=get_remote_address,
+    default_limits=[config.DEFAULT_LIMIT],
+    enabled=config.LIMITER_ENABLED
+)
 
 app = FastAPI(
     title=config.TITLE,
@@ -24,6 +35,10 @@ app = FastAPI(
         "url": "https://www.gnu.org/licenses/agpl-3.0.en.html"
     }
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 # Adding the various Fastapi-User routes
 app.include_router(
@@ -65,7 +80,6 @@ app.include_router(
     collection_router
 )
 
-
 if config.REDIS_URL is not None:
     @app.on_event("startup")
     async def startup():
@@ -75,4 +89,3 @@ elif config.REDIS_URL is None:
     @app.on_event("startup")
     async def startup():
         FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache", key_builder=custom_key_builder)
-

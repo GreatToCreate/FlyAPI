@@ -19,6 +19,7 @@ services:
       - SECRET_KEY=flytospace
       - DEV_MODE=True
       - REDIS_URL=redis://redis:6379
+      - LIMITER_ENABLED=True
     depends_on:
       - db
       - redis

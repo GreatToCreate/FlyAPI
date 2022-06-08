@@ -8,3 +8,4 @@ services:
       - "8000:8000"
     environment:
       - DEV_MODE=True
+      - LIMITER_ENABLED=False
