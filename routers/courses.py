@@ -1,4 +1,5 @@
 from fastapi import Depends, HTTPException, APIRouter, Query
+from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy.future import select
@@ -44,7 +45,7 @@ async def create_course(course: SchemaCourseIn,
 
 
 @course_router.put("/courses/{course_id}/rating/{rating}", status_code=204, tags=["courses"])
-async def rate_ship(course_id: int,
+async def rate_course(course_id: int,
                     rating: int,
                     session: AsyncSession = Depends(get_async_session),
                     user: User = Depends(current_active_user)):
@@ -56,10 +57,22 @@ async def rate_ship(course_id: int,
         raise HTTPException(status_code=404, detail=f"Course with id: {course_id} not found")
 
     if rating in (0, 1):
-        db_course_rating = CourseHasRating(course_id=course_id, user_id=user.id, rating=rating)
-        # This handles the upsert scenario in case you're reading this and scared
-        session.add(db_course_rating)
-        await session.commit()
+        existing_result = await session.execute(select(CourseHasRating).where(
+            and_(
+                CourseHasRating.user_id == user.id,
+                CourseHasRating.course_id == course_id
+            )
+        ))
+
+        existing_rating: CourseHasRating = existing_result.scalars().first()
+
+        if existing_rating is None:
+            db_course_rating = CourseHasRating(course_id=course_id, user_id=user.id, rating=rating)
+            session.add(db_course_rating)
+            await session.commit()
+        elif existing_rating is not None:
+            existing_rating.rating = rating
+            await session.commit()
 
     else:
         raise HTTPException(status_code=400, detail="Rating must be 0 (not recommended) or 1 (recommended)")

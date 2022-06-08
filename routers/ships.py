@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import and_
 
 from fastapi_cache.decorator import cache
 
@@ -53,11 +54,22 @@ async def rate_ship(ship_id: int,
         raise HTTPException(status_code=404, detail=f"Ship with id: {ship_id} not found")
 
     if rating in (0, 1):
-        db_ship_rating = ShipHasRating(ship_id=ship_id, user_id=user.id, rating=rating)
-        # This handles the upsert scenario in case you're reading this and scared
-        session.add(db_ship_rating)
-        await session.commit()
+        existing_result = await session.execute(select(ShipHasRating).where(
+            and_(
+                ShipHasRating.user_id == user.id,
+                ShipHasRating.ship_id == ship_id
+            )
+        ))
 
+        existing_rating: ShipHasRating = existing_result.scalars().first()
+
+        if existing_rating is None:
+            db_ship_rating = ShipHasRating(ship_id=ship_id, user_id=user.id, rating=rating)
+            session.add(db_ship_rating)
+            await session.commit()
+        elif existing_rating is not None:
+            existing_rating.rating = rating
+            await session.commit()
     else:
         raise HTTPException(status_code=400, detail="Rating must be 0 (not recommended) or 1 (recommended)")
 

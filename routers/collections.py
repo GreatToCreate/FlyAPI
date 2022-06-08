@@ -1,4 +1,5 @@
 from fastapi import Depends, HTTPException, APIRouter, Query
+from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy.future import select
@@ -39,7 +40,7 @@ async def create_collection(collection: SchemaCollectionIn,
 
 
 @collection_router.put("/collections/{collection_id}/rating/{rating}", status_code=204, tags=["collections"])
-async def rate_ship(collection_id: int,
+async def rate_collection(collection_id: int,
                     rating: int,
                     session: AsyncSession = Depends(get_async_session),
                     user: User = Depends(current_active_user)):
@@ -51,10 +52,22 @@ async def rate_ship(collection_id: int,
         raise HTTPException(status_code=404, detail=f"Course with id: {collection_id} not found")
 
     if rating in (0, 1):
-        db_collection_rating = CollectionHasRating(collection_id=collection_id, user_id=user.id, rating=rating)
-        # This handles the upsert scenario in case you're reading this and scared
-        session.add(db_collection_rating)
-        await session.commit()
+        existing_result = await session.execute(select(CollectionHasRating).where(
+            and_(
+                CollectionHasRating.user_id == user.id,
+                CollectionHasRating.collection_id == collection_id
+            )
+        ))
+
+        existing_rating: CollectionHasRating = existing_result.scalars().first()
+
+        if existing_rating is None:
+            db_collection_rating = CollectionHasRating(collection_id=collection_id, user_id=user.id, rating=rating)
+            session.add(db_collection_rating)
+            await session.commit()
+        elif existing_rating is not None:
+            existing_rating.rating = rating
+            await session.commit()
 
     else:
         raise HTTPException(status_code=400, detail="Rating must be 0 (not recommended) or 1 (recommended)")
