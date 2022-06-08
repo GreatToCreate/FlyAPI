@@ -96,7 +96,7 @@ class EnvironmentEnum(Enum):
     night_cloudy = "Night Cloudy"
     red_planet = "Red Planet"
     blue_planet = "Blue Planet"
-    red_blue_nebula = "Red / Blue Nebula",
+    red_blue_nebula = "Red / Blue Nebula"
     yellow_green_nebula = "Yellow / Green Nebula"
 
 
