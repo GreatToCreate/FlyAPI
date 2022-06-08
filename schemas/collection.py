@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, validator
 from uuid import UUID
-from .course import CourseRead
+from schemas.course import CourseRead
 
 
 class Collection(BaseModel):
@@ -32,12 +32,6 @@ class CollectionRead(Collection):
     name: str
     author_id: UUID
     courses: Optional[list[CourseRead]]
-
-    # This validator produces an empty list on read in a scenario where it doesn't exist and otherwise converts list[
-    # models.Course] into list[CourseRead]
-    @validator("courses", pre=True, always=True)
-    def set_courses(cls, v):
-        return [CourseRead(**course.__dict__) for course in v] or []
 
     class Config:
         orm_mode = True
