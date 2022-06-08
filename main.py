@@ -9,6 +9,7 @@ from routers.ships import ship_router
 import aioredis
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from utilities.fastapi_cache.custom_builder import custom_key_builder
 
 from config import config
@@ -65,7 +66,13 @@ app.include_router(
 )
 
 
-@app.on_event("startup")
-async def startup():
-    redis = aioredis.from_url(config.REDIS_URL, encoding="utf8", decode_responses=True)
-    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache", key_builder=custom_key_builder)
+if config.REDIS_URL is not None:
+    @app.on_event("startup")
+    async def startup():
+        redis = aioredis.from_url(config.REDIS_URL, encoding="utf8", decode_responses=True)
+        FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache", key_builder=custom_key_builder)
+elif config.REDIS_URL is None:
+    @app.on_event("startup")
+    async def startup():
+        FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache", key_builder=custom_key_builder)
+
