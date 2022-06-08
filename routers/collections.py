@@ -10,7 +10,7 @@ from starlette.status import HTTP_204_NO_CONTENT
 from fastapi_cache.decorator import cache
 
 from database.database import User, get_async_session
-from database.models.models import Course, Collection
+from database.models.models import Course, Collection, CollectionHasRating
 from schemas.collection import CollectionIn as SchemaCollectionIn, CollectionRead as SchemaCollectionRead, \
     CollectionUpdate as SchemaCollectionUpdate
 from utilities.fastapi_users.users import current_active_user
@@ -36,6 +36,30 @@ async def create_collection(collection: SchemaCollectionIn,
     except IntegrityError as _:
         raise HTTPException(status_code=409, detail=f"Collection name already taken")
     return db_collection.__dict__
+
+
+@collection_router.put("/collections/{collection_id}/rating/{rating}", status_code=204, tags=["collections"])
+async def rate_ship(collection_id: int,
+                    rating: int,
+                    session: AsyncSession = Depends(get_async_session),
+                    user: User = Depends(current_active_user)):
+    # Get the course if it exists
+    result = await session.execute(select(Collection).where(Collection.id == collection_id))
+    db_collection: Collection = result.scalars().first()
+
+    if db_collection is None:
+        raise HTTPException(status_code=404, detail=f"Course with id: {collection_id} not found")
+
+    if rating in (0, 1):
+        db_collection_rating = CollectionHasRating(collection_id=collection_id, user_id=user.id, rating=rating)
+        # This handles the upsert scenario in case you're reading this and scared
+        session.add(db_collection_rating)
+        await session.commit()
+
+    else:
+        raise HTTPException(status_code=400, detail="Rating must be 0 (not recommended) or 1 (recommended)")
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
 
 
 @collection_router.patch("/collections/id/{collection_id}", status_code=204, tags=["collections"])

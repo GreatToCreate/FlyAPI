@@ -83,3 +83,36 @@ class Collection(Base):
     # joined is the strategy we have to use for courses as it pre-fetches the data so that we don't run into async
     # errors relating to lazy select
     courses = relationship("Course", secondary=collection_has_course, back_populates="collections", lazy="joined")
+
+
+class CourseHasRating(Base):
+    """
+    Ship sqlalchemy ORM model. Mostly metadata for filtering on searches but also containing the actual JSON the game
+    expects to serialize
+    """
+    __tablename__ = "course_has_rating"
+    course_id = Column("course_id", ForeignKey("course.id"), primary_key=True)
+    user_id = Column("user_id", ForeignKey("user.id"), primary_key=True)
+    rating = Column("rating", Integer, nullable=True)
+
+
+class ShipHasRating(Base):
+    """
+    Ship sqlalchemy ORM model. Mostly metadata for filtering on searches but also containing the actual JSON the game
+    expects to serialize
+    """
+    __tablename__ = "ship_has_rating"
+    ship_id = Column("ship_id", ForeignKey("ship.id"), primary_key=True)
+    user_id = Column("user_id", ForeignKey("user.id"), primary_key=True)
+    rating = Column("rating", Integer, nullable=True)
+
+
+class CollectionHasRating(Base):
+    """
+    Ship sqlalchemy ORM model. Mostly metadata for filtering on searches but also containing the actual JSON the game
+    expects to serialize
+    """
+    __tablename__ = "collection_has_rating"
+    collection_id = Column("collection_id", ForeignKey("collection.id"), primary_key=True)
+    user_id = Column("user_id", ForeignKey("user.id"), primary_key=True)
+    rating = Column("rating", Integer, nullable=True)

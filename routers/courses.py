@@ -10,7 +10,7 @@ from starlette.status import HTTP_204_NO_CONTENT
 from fastapi_cache.decorator import cache
 
 from database.database import User, get_async_session
-from database.models.models import Course
+from database.models.models import Course, CourseHasRating
 from schemas.course import CourseIn as SchemaCourseIn, CourseRead as SchemaCourseRead, \
     CourseUpdate as SchemaCourseUpdate, CourseReadSimple as SchemaCourseReadSimple
 from utilities.fastapi_users.users import current_active_user
@@ -41,6 +41,30 @@ async def create_course(course: SchemaCourseIn,
     except IntegrityError as _:
         raise HTTPException(status_code=409, detail=f"Course name already taken")
     return db_course.__dict__
+
+
+@course_router.put("/courses/{course_id}/rating/{rating}", status_code=204, tags=["courses"])
+async def rate_ship(course_id: int,
+                    rating: int,
+                    session: AsyncSession = Depends(get_async_session),
+                    user: User = Depends(current_active_user)):
+    # Get the course if it exists
+    result = await session.execute(select(Course).where(Course.id == course_id))
+    db_course: Course = result.scalars().first()
+
+    if db_course is None:
+        raise HTTPException(status_code=404, detail=f"Course with id: {course_id} not found")
+
+    if rating in (0, 1):
+        db_course_rating = CourseHasRating(course_id=course_id, user_id=user.id, rating=rating)
+        # This handles the upsert scenario in case you're reading this and scared
+        session.add(db_course_rating)
+        await session.commit()
+
+    else:
+        raise HTTPException(status_code=400, detail="Rating must be 0 (not recommended) or 1 (recommended)")
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
 
 
 @course_router.patch("/courses/id/{course_id}", status_code=204, tags=["courses"])

@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi_cache.decorator import cache
 
 from database.database import User, get_async_session
-from database.models.models import Ship
+from database.models.models import Ship, ShipHasRating
 from schemas.ship import ShipIn as SchemaShipIn, ShipRead as SchemaShipRead, ShipUpdate as SchemaShipUpdate
 from utilities.fastapi_users.users import current_active_user
 
@@ -38,6 +38,30 @@ async def create_ship(ship: SchemaShipIn,
         raise HTTPException(status_code=409, detail=f"Ship name: {ship.name} already taken")
 
     return db_ship.__dict__
+
+
+@ship_router.put("/ships/{ship_id}/rating/{rating}", status_code=204, tags=["ships"])
+async def rate_ship(ship_id: int,
+                    rating: int,
+                    session: AsyncSession = Depends(get_async_session),
+                    user: User = Depends(current_active_user)):
+    # Get the ship if it exists
+    result = await session.execute(select(Ship).where(Ship.id == ship_id))
+    db_ship: Ship = result.scalars().first()
+
+    if db_ship is None:
+        raise HTTPException(status_code=404, detail=f"Ship with id: {ship_id} not found")
+
+    if rating in (0, 1):
+        db_ship_rating = ShipHasRating(ship_id=ship_id, user_id=user.id, rating=rating)
+        # This handles the upsert scenario in case you're reading this and scared
+        session.add(db_ship_rating)
+        await session.commit()
+
+    else:
+        raise HTTPException(status_code=400, detail="Rating must be 0 (not recommended) or 1 (recommended)")
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
 
 
 @ship_router.patch("/ships/id/{ship_id}", status_code=204, tags=["ships"])
