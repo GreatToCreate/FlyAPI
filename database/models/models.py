@@ -1,5 +1,5 @@
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTableUUID
-from sqlalchemy import Column, ForeignKey, Integer, String, Enum, JSON, Table
+from sqlalchemy import Column, ForeignKey, Integer, String, Enum, JSON, Table, DateTime, BigInteger
 from sqlalchemy.orm import relationship
 from database.database import Base
 
@@ -17,7 +17,7 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     """
     __tablename__ = "user"
     username = Column(String(20), unique=True, nullable=False)
-    steam_id = Column(String, nullable=True)
+    steam_id = Column(BigInteger, nullable=True)
     steam_username = Column(String, nullable=True)
     courses = relationship("Course", back_populates="author", lazy="select")
     ships = relationship("Ship", back_populates="author", lazy="select")
@@ -83,6 +83,26 @@ class Collection(Base):
     # joined is the strategy we have to use for courses as it pre-fetches the data so that we don't run into async
     # errors relating to lazy select
     courses = relationship("Course", secondary=collection_has_course, back_populates="collections", lazy="joined")
+
+
+class TopScore(Base):
+    __tablename__ = "top_score"
+    id = Column(Integer, primary_key=True)
+    rank = Column(Integer)
+    steam_id = Column(BigInteger)
+    points = Column(Integer)
+    course = Column(String(40))
+    time = Column(Integer)
+    timestamp = Column(DateTime)
+
+
+class Leader(Base):
+    __tablename__ = "leader"
+    id = Column(Integer, primary_key=True)
+    steam_id = Column(BigInteger)
+    steam_username = Column(String, nullable=True)
+    points = Column(Integer)
+    timestamp = Column(DateTime)
 
 
 class CourseHasRating(Base):

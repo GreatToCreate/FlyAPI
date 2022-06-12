@@ -2,9 +2,11 @@ from fastapi import FastAPI
 
 from routers.collections import collection_router
 from routers.courses import course_router
+from routers.leaderboards import leaderboard_router
+from routers.ships import ship_router
 from schemas.user import UserCreate, UserRead, UserUpdate
 from utilities.fastapi_users.users import auth_backend, fastapi_users
-from routers.ships import ship_router
+
 
 import aioredis
 from fastapi_cache import FastAPICache
@@ -78,6 +80,10 @@ app.include_router(
 # Adding the collection routes
 app.include_router(
     collection_router
+)
+
+app.include_router(
+    leaderboard_router
 )
 
 if config.REDIS_URL is not None:
