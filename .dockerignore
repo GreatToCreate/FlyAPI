@@ -5,3 +5,7 @@
 /test/api/.pytest_cache/
 /.idea//ARCHITECTURE.md
 /.gitignore
+/FlyAPI ERD.png
+/README.md
+/docker-compose-sqlite-test.yml
+/docker-compose-postgres-redis-test.yml

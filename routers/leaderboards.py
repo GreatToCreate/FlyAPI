@@ -26,7 +26,9 @@ async def get_leaderboards(request: Request,
                 FROM top_score
                 WHERE timestamp = (SELECT MAX(timestamp) FROM top_score)
                 GROUP BY course
-            ) t JOIN top_score ts ON ts.course = t.course AND t.points = ts.points"""
+            ) t JOIN top_score ts ON ts.course = t.course 
+                AND t.points = ts.points 
+                AND timestamp = (SELECT MAX(timestamp) FROM top_score)"""
     )
 
     top_scores = result.all()

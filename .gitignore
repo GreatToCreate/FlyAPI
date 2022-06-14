@@ -4,3 +4,4 @@
 /.pytest_cache/
 /test/api/.pytest_cache/
 /.idea/
+/docker-compose-example.yml
