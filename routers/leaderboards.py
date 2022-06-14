@@ -1,6 +1,4 @@
-from fastapi import Depends, APIRouter, Query
-from sqlalchemy import func
-from sqlalchemy import and_
+from fastapi import Depends, APIRouter
 from sqlalchemy import text
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,11 +38,10 @@ async def get_leaderboards(request: Request,
 @cache(expire=30)
 async def get_leaderboard_by_name(request: Request,
                            response: Response,
-                           course_name: str | None = None,
+                           course_name: str,
                            session: AsyncSession = Depends(get_async_session)):
-    if course_name is not None:
-        stmt = text("SELECT course, rank, steam_id, time, points FROM top_score ts WHERE timestamp = (SELECT MAX(timestamp) FROM top_score) AND course = :c ORDER BY points desc limit 20")
-        result = await session.execute(stmt, {"c": course_name})
+    stmt = text("SELECT course, rank, steam_id, time, points FROM top_score ts WHERE timestamp = (SELECT MAX(timestamp) FROM top_score) AND course = :c ORDER BY points desc limit 20")
+    result = await session.execute(stmt, {"c": course_name})
 
     top_scores = result.all()
 
