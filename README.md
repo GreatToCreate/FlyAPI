@@ -28,7 +28,7 @@ If you just want to run the project in debug mode, decide which database you int
 
     docker compose -f docker-compose-api-example.yml up -d
 
-If you're looking to run the entire suite of Fly Dangerous-related services, ensure that you've cloned all of the repos into the same parent director (FlyAPI, FlyBot, and FlyAnalytics), edit the necessary environmental variables (specifically token), and execute this from the FlyAPI Project Root:
+If you're looking to run the entire suite of Fly Dangerous-related services, ensure that you've cloned all of the repos into the same parent directory (FlyAPI, FlyBot, and FlyAnalytics), edit the necessary environmental variables (specifically token), and execute this from the FlyAPI Project Root:
 	
 	docker compose -f docker-compose-full-example.yml up -d
 
@@ -37,7 +37,6 @@ If you're looking to run the entire suite of Fly Dangerous-related services, ens
 
 #### Additional Docker Information
 - If you want to use a database other than Postgres or SQLite, you may need to install the relevant asynchronous python driver (by adding this dependency in requirements.txt) in order for SQLAlchemy's engine to be able to interact with your database system. Most relational databases supported by SQLAlchemy should work, but you may run into issues depending on what level of support the database has for ENUM types (check out the database/models/models.py for more information).
-in
 
 ## Running the Tests
 1. Activate the virtual environment you've made for this project
