@@ -1,7 +1,7 @@
-from fastapi_users import FastAPIUsers
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-
 from typing import Type, Sequence
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi_users import FastAPIUsers
 from fastapi_users import schemas, exceptions, models
 from fastapi_users.authentication import AuthenticationBackend
 from fastapi_users.manager import BaseUserManager, UserManagerDependency

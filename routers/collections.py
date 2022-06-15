@@ -1,14 +1,12 @@
 from fastapi import Depends, HTTPException, APIRouter, Query
+from fastapi_cache.decorator import cache
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-
-from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.status import HTTP_204_NO_CONTENT
-
-from fastapi_cache.decorator import cache
 
 from database.database import User, get_async_session
 from database.models.models import Course, Collection, CollectionHasRating
@@ -28,8 +26,8 @@ async def create_collection(collection: SchemaCollectionIn,
                             user: User = Depends(current_active_user)):
     try:
         db_collection = Collection(name=collection.name,
-                                description=collection.description,
-                                author_id=user.id)
+                                   description=collection.description,
+                                   author_id=user.id)
 
         session.add(db_collection)
         await session.commit()
@@ -41,9 +39,9 @@ async def create_collection(collection: SchemaCollectionIn,
 
 @collection_router.put("/collections/{collection_id}/rating/{rating}", status_code=204, tags=["collections"])
 async def rate_collection(collection_id: int,
-                    rating: int,
-                    session: AsyncSession = Depends(get_async_session),
-                    user: User = Depends(current_active_user)):
+                          rating: int,
+                          session: AsyncSession = Depends(get_async_session),
+                          user: User = Depends(current_active_user)):
     # Get the course if it exists
     result = await session.execute(select(Collection).where(Collection.id == collection_id))
     db_collection: Collection = result.scalars().first()

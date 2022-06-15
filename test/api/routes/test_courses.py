@@ -308,8 +308,8 @@ course_payload = {
 }
 
 form_data = {
-        "username": "test@example.com",
-        "password": "test"
+    "username": "test@example.com",
+    "password": "test"
 }
 
 
@@ -352,7 +352,6 @@ async def test_get_courses(async_client: AsyncClient) -> None:
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}"
     }
-
 
     await async_client.post("/courses/", headers=headers, json=course_payload)
 

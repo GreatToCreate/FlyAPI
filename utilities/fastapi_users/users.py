@@ -3,16 +3,15 @@ from typing import Optional
 
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, UUIDIDMixin
-
 from fastapi_users.authentication import (
     AuthenticationBackend,
     BearerTransport,
     JWTStrategy,
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
-from database.database import get_user_db, User
 
 from config import config
+from database.database import get_user_db, User
 from utilities.fastapi_users.register_fastapi_user_custom import CustomFastAPIUsers
 
 

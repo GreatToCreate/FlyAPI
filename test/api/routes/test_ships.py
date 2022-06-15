@@ -2,46 +2,45 @@ import pytest
 from httpx import AsyncClient
 from starlette import status
 
-
 user_payload = {
-        "email": "test@example.com",
-        "password": "test",
-        "is_active": True,
-        "is_superuser": False,
-        "is_verified": False,
-        "username": "Test"
-    }
+    "email": "test@example.com",
+    "password": "test",
+    "is_active": True,
+    "is_superuser": False,
+    "is_verified": False,
+    "username": "Test"
+}
 
 ship_payload = {
-        "description": "Test description",
-        "ship_json": {
-            "angularDrag": 10.0,
-            "boostCapacitorPercentCost": 10.0,
-            "boostCapacityPercentChargeRate": 200.0,
-            "boostMaxSpeedDropOffTime": 10.2,
-            "boostRechargeTime": 20.3,
-            "drag": 0,
-            "inertiaTensorMultiplier": 60,
-            "latHMultiplier": 0,
-            "latVMultiplier": 0,
-            "mass": 0,
-            "maxAngularVelocity": 0,
-            "maxBoostSpeed": 0,
-            "maxSpeed": 0,
-            "maxThrust": 0,
-            "minUserLimitedVelocity": 0,
-            "pitchMultiplier": 0,
-            "rollMultiplier": 0,
-            "throttleMultiplier": 0,
-            "thrustBoostMultiplier": 0,
-            "torqueBoostMultiplier": 0,
-            "torqueThrustMultiplier": 0,
-            "totalBoostRotationalTime": 0,
-            "totalBoostTime": 0,
-            "yawMultiplier": 0
-        },
-        "name": "Test Ship"
-    }
+    "description": "Test description",
+    "ship_json": {
+        "angularDrag": 10.0,
+        "boostCapacitorPercentCost": 10.0,
+        "boostCapacityPercentChargeRate": 200.0,
+        "boostMaxSpeedDropOffTime": 10.2,
+        "boostRechargeTime": 20.3,
+        "drag": 0,
+        "inertiaTensorMultiplier": 60,
+        "latHMultiplier": 0,
+        "latVMultiplier": 0,
+        "mass": 0,
+        "maxAngularVelocity": 0,
+        "maxBoostSpeed": 0,
+        "maxSpeed": 0,
+        "maxThrust": 0,
+        "minUserLimitedVelocity": 0,
+        "pitchMultiplier": 0,
+        "rollMultiplier": 0,
+        "throttleMultiplier": 0,
+        "thrustBoostMultiplier": 0,
+        "torqueBoostMultiplier": 0,
+        "torqueThrustMultiplier": 0,
+        "totalBoostRotationalTime": 0,
+        "totalBoostTime": 0,
+        "yawMultiplier": 0
+    },
+    "name": "Test Ship"
+}
 
 form_data = {
     "username": "test@example.com",

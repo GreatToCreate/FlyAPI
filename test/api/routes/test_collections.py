@@ -1,7 +1,6 @@
 import pytest
 from httpx import AsyncClient
 from starlette import status
-import time
 
 user_payload = {
     "email": "test@example.com",
@@ -309,8 +308,8 @@ course_payload = {
 }
 
 form_data = {
-        "username": "test@example.com",
-        "password": "test"
+    "username": "test@example.com",
+    "password": "test"
 }
 
 collection_payload = {

@@ -1,25 +1,21 @@
+import aioredis
 from fastapi import FastAPI
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi_cache.backends.redis import RedisBackend
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
 
+from config import config
 from routers.collections import collection_router
 from routers.courses import course_router
 from routers.leaderboards import leaderboard_router
 from routers.ships import ship_router
 from schemas.user import UserCreate, UserRead, UserUpdate
-from utilities.fastapi_users.users import auth_backend, fastapi_users
-
-
-import aioredis
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-from fastapi_cache.backends.inmemory import InMemoryBackend
 from utilities.fastapi_cache.custom_builder import custom_key_builder
-
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.middleware import SlowAPIMiddleware
-from slowapi.errors import RateLimitExceeded
-
-from config import config
+from utilities.fastapi_users.users import auth_backend, fastapi_users
 
 limiter = Limiter(
     storage_uri=config.REDIS_URL,

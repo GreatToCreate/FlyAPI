@@ -1,14 +1,13 @@
 import asyncio
 from typing import AsyncGenerator, Generator, Callable
+from unittest import mock
 
 import pytest_asyncio
 from fastapi import FastAPI
-
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.database import Base, async_session_maker, engine
 
-from unittest import mock
+from database.database import Base, async_session_maker, engine
 
 mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 

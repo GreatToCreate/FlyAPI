@@ -1,6 +1,7 @@
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTableUUID
 from sqlalchemy import Column, ForeignKey, Integer, String, Enum, JSON, Table, DateTime, BigInteger
 from sqlalchemy.orm import relationship
+
 from database.database import Base
 
 

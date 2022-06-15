@@ -1,6 +1,8 @@
 from typing import Optional
-from pydantic import BaseModel, validator
 from uuid import UUID
+
+from pydantic import BaseModel
+
 from schemas.course import CourseRead
 
 

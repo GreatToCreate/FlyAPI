@@ -1,14 +1,12 @@
 from fastapi import Depends, HTTPException, APIRouter, Query
+from fastapi_cache.decorator import cache
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-
-from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.status import HTTP_204_NO_CONTENT
-
-from fastapi_cache.decorator import cache
 
 from database.database import User, get_async_session
 from database.models.models import Course, CourseHasRating
@@ -46,9 +44,9 @@ async def create_course(course: SchemaCourseIn,
 
 @course_router.put("/courses/{course_id}/rating/{rating}", status_code=204, tags=["courses"])
 async def rate_course(course_id: int,
-                    rating: int,
-                    session: AsyncSession = Depends(get_async_session),
-                    user: User = Depends(current_active_user)):
+                      rating: int,
+                      session: AsyncSession = Depends(get_async_session),
+                      user: User = Depends(current_active_user)):
     # Get the course if it exists
     result = await session.execute(select(Course).where(Course.id == course_id))
     db_course: Course = result.scalars().first()

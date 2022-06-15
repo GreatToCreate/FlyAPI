@@ -1,15 +1,12 @@
 from fastapi import Depends, HTTPException, APIRouter, Query
+from fastapi_cache.decorator import cache
+from sqlalchemy import and_
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.status import HTTP_204_NO_CONTENT
-
-from sqlalchemy.exc import IntegrityError
-
-from sqlalchemy.future import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import and_
-
-from fastapi_cache.decorator import cache
 
 from database.database import User, get_async_session
 from database.models.models import Ship, ShipHasRating

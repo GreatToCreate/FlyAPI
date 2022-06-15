@@ -164,7 +164,6 @@ async def test_jwt_get_user_me(async_client: AsyncClient) -> None:
 
     assert "id" in data
 
-
 # @pytest.mark.asyncio
 # async def test_jwt_modify_user_me(async_client: AsyncClient) -> None:
 #     expected_response = {

@@ -1,8 +1,8 @@
+import pytest
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.models import User
-import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.asyncio

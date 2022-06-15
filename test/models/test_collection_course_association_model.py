@@ -1,6 +1,7 @@
-from database.models.models import User, Course, Collection
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from database.models.models import User, Course, Collection
 
 
 @pytest.mark.asyncio
