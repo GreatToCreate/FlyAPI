@@ -16,15 +16,16 @@ def custom_key_builder(
 ):
     from fastapi_cache import FastAPICache
 
+    # Removing args and kwargs that shouldn't be included in the cache key
     ignored_arg_types = [AsyncSession, Request, Response]
-
+    kwargs.pop("session")
     args = [arg for arg in args if type(arg) not in ignored_arg_types]
 
     prefix = f"{FastAPICache.get_prefix()}:{namespace}:"
     cache_key = (
             prefix
             + hashlib.md5(  # nosec:B303
-        f"{func.__module__}:{func.__name__}:{args}".encode()
+        f"{func.__module__}:{func.__name__}:{args}:{kwargs}".encode()
     ).hexdigest()
     )
     return cache_key

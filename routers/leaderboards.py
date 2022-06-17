@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, Query
 from fastapi_cache.decorator import cache
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -39,10 +39,13 @@ async def get_leaderboards(request: Request,
 async def get_leaderboard_by_name(request: Request,
                                   response: Response,
                                   course_name: str,
+                                  limit: int = Query(default=20, lte=50),
                                   session: AsyncSession = Depends(get_async_session)):
     stmt = text(
-        "SELECT course, rank, steam_id, time, points FROM top_score ts WHERE timestamp = (SELECT MAX(timestamp) FROM top_score) AND course = :c ORDER BY points desc limit 20")
-    result = await session.execute(stmt, {"c": course_name})
+        "SELECT course, rank, steam_id, time, points FROM top_score ts WHERE timestamp = (SELECT MAX(timestamp) FROM top_score) AND course = :c ORDER BY points desc limit :l"
+    )
+    result = await session.execute(stmt, {"c": course_name,
+                                          "l": limit})
 
     top_scores = result.all()
 
@@ -53,10 +56,12 @@ async def get_leaderboard_by_name(request: Request,
 @cache(expire=30)
 async def get_top_players(request: Request,
                           response: Response,
+                          limit: int = Query(default=20, lte=50),
                           session: AsyncSession = Depends(get_async_session)):
-    result = await session.execute(
-        """SELECT steam_username, points from leader where timestamp = (SELECT MAX(timestamp) FROM leader)"""
+    stmt = text(
+        """SELECT steam_username, points from leader where timestamp = (SELECT MAX(timestamp) FROM leader) limit :l"""
     )
+    result = await session.execute(stmt, {"l": limit})
     leaders = result.all()
 
     return [SchemaLeader.from_orm(leader) for leader in leaders]
