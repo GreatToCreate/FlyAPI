@@ -87,22 +87,13 @@ class Collection(Base):
 
 
 class TopScore(Base):
-    __tablename__ = "top_score"
+    __tablename__ = "top_score_history"
     id = Column(Integer, primary_key=True)
     rank = Column(Integer)
     steam_id = Column(BigInteger)
     points = Column(Integer)
     course = Column(String(40))
     time = Column(Integer)
-    timestamp = Column(DateTime)
-
-
-class Leader(Base):
-    __tablename__ = "leader"
-    id = Column(Integer, primary_key=True)
-    steam_id = Column(BigInteger)
-    steam_username = Column(String, nullable=True)
-    points = Column(Integer)
     timestamp = Column(DateTime)
 
 

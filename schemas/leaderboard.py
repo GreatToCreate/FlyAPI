@@ -7,7 +7,8 @@ class Leader(BaseModel):
     """
     Base class for a leader entry
     """
-    steam_username: str
+    steam_username: Optional[str]
+    steam_id: Optional[int]
     points: int
 
     class Config:

@@ -57,11 +57,20 @@ async def get_leaderboard_by_name(request: Request,
 async def get_top_players(request: Request,
                           response: Response,
                           limit: int = Query(default=20, lte=50),
+                          steam_id: int | None = None,
                           session: AsyncSession = Depends(get_async_session)):
-    stmt = text(
-        """SELECT steam_username, points from leader where timestamp = (SELECT MAX(timestamp) FROM leader) limit :l"""
-    )
-    result = await session.execute(stmt, {"l": limit})
-    leaders = result.all()
 
+    if steam_id is None:
+        stmt = text(
+            """SELECT steam_username, points from leader where timestamp = (SELECT MAX(timestamp) FROM leader) limit :l"""
+        )
+        result = await session.execute(stmt, {"l": limit})
+
+    elif steam_id is not None:
+        stmt = text(
+            """SELECT steam_username, steam_id, points from leader where timestamp = (SELECT MAX(timestamp) FROM leader) AND steam_id = :s"""
+        )
+        result = await session.execute(stmt, {"s": steam_id})
+
+    leaders = result.all()
     return [SchemaLeader.from_orm(leader) for leader in leaders]
