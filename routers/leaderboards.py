@@ -16,6 +16,9 @@ leaderboard_router = APIRouter()
 async def get_leaderboards(request: Request,
                            response: Response,
                            session: AsyncSession = Depends(get_async_session)):
+    # ToDo I believe this is the issue driving the stale data- look here if fixes have not changed behavior
+    await session.commit()
+
     result = await session.execute(
         """SELECT ts.course, ts.steam_id, ts.time, t.points
             FROM (
@@ -41,8 +44,11 @@ async def get_leaderboard_by_name(request: Request,
                                   course_name: str,
                                   limit: int = Query(default=20, lte=50),
                                   session: AsyncSession = Depends(get_async_session)):
+    # ToDo I believe this is the issue driving the stale data- look here if fixes have not changed behavior
+    await session.commit()
+
     stmt = text(
-        "SELECT course, rank, steam_id, time, points FROM top_score ts WHERE timestamp = (SELECT MAX(timestamp) FROM top_score) AND course = :c ORDER BY points desc limit :l"
+        "SELECT course, rank, steam_id, time, points, timestamp FROM top_score ts WHERE course = :c ORDER BY points desc limit :l"
     )
     result = await session.execute(stmt, {"c": course_name,
                                           "l": limit})
@@ -59,16 +65,18 @@ async def get_top_players(request: Request,
                           limit: int = Query(default=20, lte=50),
                           steam_id: int | None = None,
                           session: AsyncSession = Depends(get_async_session)):
+    # ToDo I believe this is the issue driving the stale data- look here if fixes have not changed behavior
+    await session.commit()
 
     if steam_id is None:
         stmt = text(
-            """SELECT steam_username, points from leader where timestamp = (SELECT MAX(timestamp) FROM leader) limit :l"""
+            """SELECT steam_username, points from leader limit :l"""
         )
         result = await session.execute(stmt, {"l": limit})
 
     elif steam_id is not None:
         stmt = text(
-            """SELECT steam_username, steam_id, points from leader where timestamp = (SELECT MAX(timestamp) FROM leader) AND steam_id = :s"""
+            """SELECT steam_username, steam_id, points from leader where steam_id = :s"""
         )
         result = await session.execute(stmt, {"s": steam_id})
 
